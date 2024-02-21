@@ -130,7 +130,7 @@ def getOrderStauts(orderHistory):
   return orderHistory[0]
 
 api_called = 0
-
+order_history_count = 0
 
 token1 = 0
 token2 = 0
@@ -339,6 +339,7 @@ isAlternateOrderCancelled = False
 # HANDLE SQUARE OFF ORDER------------------------------------------------------------------------------------------------------------------------------
 def handleSquareOff(angel_token_symbol, token, orderItem):
   global api_called
+  global order_history_count
   global cancel_target_orderno
   global state
   global isStoplossModified, isTargetModified
@@ -349,9 +350,11 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
   # IF ORDER NOT EXECUTED THEN CHECK EXECUTION STATUS
   if orderItem['is_order_executed'] == False:
     orderItem_history = api.single_order_history(orderno=orderItem['order_no']) 
+    order_history_count = order_history_count + 1
+    print("ORDER EXECUTION STATUS :::  ", getOrderStauts(orderItem_history)['tsym'], " STATUS: ", getOrderStauts(orderItem_history)['stat'], " CHECK STATUS COUNT: ", order_history_count)
 
     # IF ORDER EXECUTED THEN
-    if getOrderStauts(orderItem_history)['stat'] == 'Ok' and getOrderStauts(orderItem_history)['status'] == "REJECTED":
+    if getOrderStauts(orderItem_history)['stat'] == 'Ok' and getOrderStauts(orderItem_history)['status'] == "COMPLETED":
       orderItem['is_order_executed'] = True                                       
       
       # PLACE SQUARE OFF ORDER
