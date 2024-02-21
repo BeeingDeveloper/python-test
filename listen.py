@@ -185,7 +185,7 @@ threadOrder2.start()
 # #------------------------------------------------------------------------------- IMPLEMENTING TELEGRAM FUNCTIONALITY-------------------------------------------------------
 api_id = 29395559
 api_hash = 'd3f70d97f92a979dc5578168c14fa117'
-client = TelegramClient('s1', api_id, api_hash)
+client = TelegramClient('session1', api_id, api_hash)
 
 
 isNeedToPlaceSecondOrder = True
@@ -351,7 +351,7 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
     orderItem_history = api.single_order_history(orderno=orderItem['order_no']) 
 
     # IF ORDER EXECUTED THEN
-    if getOrderStauts(orderItem_history)['stat'] == 'Ok' and getOrderStauts(orderItem_history)['status'] == "COMPLETED":
+    if getOrderStauts(orderItem_history)['stat'] == 'Ok' and getOrderStauts(orderItem_history)['status'] == "REJECTED":
       orderItem['is_order_executed'] = True                                       
       
       # PLACE SQUARE OFF ORDER
