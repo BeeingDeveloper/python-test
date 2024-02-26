@@ -138,7 +138,7 @@ order_history_count = 0
 token1 = 0
 token2 = 0
 
-
+isOrderPlaced = False
 
 
 
@@ -199,6 +199,7 @@ async def placeOrder(messageText):
     global token1
     global token2
     global isNeedToPlaceSecondOrder
+    global isOrderPlaced
 
     # EXTRACT MESSAGE CONTENT
     message_content = messageText.upper()
@@ -258,7 +259,7 @@ async def placeOrder(messageText):
 
 
     # PLACE ORDER
-    if(message_content.find("BANK")):
+    if(message_content.find("BANK") and isOrderPlaced == False):
       order_response = api.place_order(
       buy_or_sell='B', 
       product_type='I', 
@@ -273,6 +274,7 @@ async def placeOrder(messageText):
       remarks='Option order placed...')
 
       orderNo = order_response['norenordno']
+      isOrderPlaced = True
 
 
       # IF ORDER 1 IS EMPTY------------
@@ -357,7 +359,7 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
     print("ORDER EXECUTION STATUS :::  ", getOrderStauts(orderItem_history)['tsym'], " STATUS: ", getOrderStauts(orderItem_history)['stat'], " CHECK STATUS COUNT: ", order_history_count)
 
     # IF ORDER EXECUTED THEN
-    if getOrderStauts(orderItem_history)['stat'] == 'Ok' and getOrderStauts(orderItem_history)['status'] == "COMPLETED":
+    if getOrderStauts(orderItem_history)['stat'] == 'Ok' and getOrderStauts(orderItem_history)['status'] == "REJECTED":
       orderItem['is_order_executed'] = True                                       
       
       # PLACE SQUARE OFF ORDER
@@ -413,33 +415,30 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
     else:
       state = "LOSS"
 
-    print("ORDER IS IN STATE: ", state)
-    if state == "PROFIT" and isTargetModified == False:                                             # -------- IF POSITION IS IN PROFIT
-      print("BOOK PROFIT, currnet price is: ",float(current_price), "  ", orderItem['order_name'] )
+    print("ORDER PNL STATE IS: ", state)
 
+    if state == "PROFIT" and isTargetModified == False:               # -------- IF POSITION IS IN PROFIT
       modified_response  = api.modify_order(
         exchange='NFO', 
         tradingsymbol=orderItem['symbol'], 
         orderno=orderItem['exit_order_no'],
         newquantity=15, 
         newprice_type='SL-LMT', 
-        newprice=orderItem['target_price'], 
-        newtrigger_price=orderItem['target_price'] + 1)      # TRIGGER PRICE < LIMIT PRICE
+        newprice=orderItem['target_price'],                           # LIMIT PRICE
+        newtrigger_price=orderItem['target_price'] - 1)               # TRIGGER PRICE < LIMIT PRICE
 
       
       isTargetModified = True           # TARGET MODIFIED = TRUE
       isStoplossModified = False        # STOPLOSS MODIFIED = FALSE
       api_called = api_called +1
 
-      print("ORDER MODIFIED AFTER PLACING STOPLOSS ORDER @officerdotakhter: ", modified_response)
+      print("BOOK PROFIT :: CURRENT PRICE : ",float(current_price), "  ", "BUYING PRICE: ", float(orderItem['buying_price']), " ", orderItem['order_name'], " --- ORDER RESPONSE --- ", modified_response )
       #--------------------------------------------------------------------- REF: README.PY > MODIFIY TARGET
     
 
 
     if state == "LOSS" and isStoplossModified == False:
-      print("BOOK LOSS, currnet price is: ",float(current_price), "  ", orderItem['order_name'])
-
-      api.modify_order(
+      modified_response = api.modify_order(
         exchange='NFO', 
         tradingsymbol=orderItem['symbol'], 
         orderno=orderItem['exit_order_no'],
@@ -451,10 +450,11 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
       isStoplossModified = True                               # STOPLOSS MODIFIED = TRUE
       isTargetModified = False                                # TARGET MODIFIED = FALSE
       api_called = api_called + 1
+
+
+      print("BOOK PROFIT :: CURRENT PRICE : ",float(current_price), "  ", "BUYING PRICE: ", float(orderItem['buying_price']), " ", orderItem['order_name'], " --- ORDER RESPONSE --- ", modified_response )
       #--------------------------------------------------------------------- REF: READMY.PY > MODIFY STOPLOSS
 
-    
-    print("ORDER MODIFIED FOR : --- ", api_called, " --- TIME ")
 
 
 
