@@ -11,6 +11,11 @@ import threading
 from SmartApi import SmartConnect
 import asyncio
 
+
+
+
+
+
 # --------------------- SMART API CREDENTIALS ---------------------
 smart_api_key = 'm1QkdimV'
 smartClientID = 'N51889834'
@@ -25,9 +30,6 @@ data = smartApi.generateSession(smartClientID, smartPWD, smartOTP)
 refreshToken = data['data']['refreshToken']
 print("REFRESH TOKEN IS = " , refreshToken)
 feedToken = smartApi.getfeedToken()
-
-
-
 
 
 class ShoonyaApiPy(NorenApi):
@@ -50,7 +52,7 @@ otp = pyotp.TOTP(token).now()
 
 
 
-
+ 
 # FINVASIA CREDENTIALS
 user = 'FA152764'
 pwd = '@RadeonV11'
@@ -109,6 +111,7 @@ order2_Obj = {
   'order_no': '',
   'target_price': 0,
   'stoploss_price' : 0,
+  
   'is_order_cancelled' : False,
   'is_position_squareOff' : False,
   'is_exit_order_placed' : False,
@@ -372,7 +375,6 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
         remarks='stoploss order placed...'
       )
 
-      #print(f''' ************* ******** ****** SL PRICE: {orderItem['stoploss_price']}   SL TRIGGER: {orderItem['stoploss_price'] + 1} ''')
 
       
       if orderItem['is_exit_order_placed'] == False:
