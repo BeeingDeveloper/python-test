@@ -425,7 +425,7 @@ def handleSquareOff(angel_token_symbol, token, orderItem):
         newquantity=15, 
         newprice_type='SL-LMT', 
         newprice=orderItem['target_price'],                           # LIMIT PRICE
-        newtrigger_price=orderItem['target_price'] - 1)               # TRIGGER PRICE < LIMIT PRICE
+        newtrigger_price=orderItem['target_price'])               # TRIGGER PRICE < LIMIT PRICE
 
       
       isTargetModified = True           # TARGET MODIFIED = TRUE
